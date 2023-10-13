@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   string payload;
   string format(FORMAT_PLAIN);
 
-  Options options(argv[0]);
+  Options options(string(APP_NAME));
   options.add_options()
       ("e,endpoint", "Endpoint URL (" + endpoint + ")", value<string>())
       ("t,topic", "Topic to use (" + topic + ")", value<string>())
@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
   auto options_parsed = options.parse(argc, argv);
 
   if (options_parsed.count("help")) {
+    cout << APP_NAME << " ver. " << APP_VERSION << endl;
     cout << options.help() << endl;
     return 0;
   }
