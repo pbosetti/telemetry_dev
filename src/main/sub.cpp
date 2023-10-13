@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
   string topic(DEFAULT_TOPIC);
   string payload;
 
+  subscriber.set(zmqpp::socket_option::receive_timeout, SOCKET_TIMEOUT);
+
   Options options(string(APP_NAME));
   options.add_options()
       ("e,endpoint", "Endpoint URL (" + endpoint + ")", value<string>())
@@ -57,7 +59,9 @@ int main(int argc, char *argv[]) {
 
   while (_running) {
     subscriber.receive(message);
-    if (message.parts() == 2) {
+    if (message.parts() == 0) {
+      continue;
+    } else if (message.parts() == 2) {
       message >> topic >> payload;
       cout << "[" << topic << "] Got message: " << payload << endl;
     } else if (message.parts() == 3) {
