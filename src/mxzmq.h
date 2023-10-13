@@ -35,7 +35,7 @@ public slots:
 
 signals:
   void gotNewMessage(const QJsonObject &obj);
-  void gotInvalidPayload(const QString &msg);
+  void gotInvalidPayload(const std::invalid_argument &ex, const QString &msg);
   void gotWrongMessage(int parts);
   void gotNoMessage();
 

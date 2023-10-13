@@ -76,8 +76,8 @@ void MXZmq::run() {
       // payload processing
       try {
         emit gotNewMessage(payloadData());
-      } catch (...) {
-        emit gotInvalidPayload(QString::fromStdString(_payload));
+      } catch (std::invalid_argument const &ex) {
+        emit gotInvalidPayload(ex, QString::fromStdString(_payload));
       }
     } else {
       emit gotNoMessage();
@@ -132,7 +132,7 @@ QJsonDocument MXZmq::payloadDocument() {
     }
   }
   if (doc.isNull()) {
-    throw std::invalid_argument("Empty document");
+    throw std::invalid_argument("Not a valid JSON document");
   }
   return doc;
 }

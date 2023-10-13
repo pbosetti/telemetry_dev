@@ -120,8 +120,8 @@ void MainWindow::newMessageReceived(const QJsonObject &obj) {
   ui->statusbar->clearMessage();
 }
 
-void MainWindow::invalidPayloadReceived(const QString &msg) {
-  ui->logMessageArea->appendPlainText(QString::asprintf("Invalid JSON: %s", msg.toStdString().c_str()));
+void MainWindow::invalidPayloadReceived(const std::invalid_argument &ex, const QString &msg) {
+  ui->logMessageArea->appendPlainText(QString::asprintf("Payload error: %s\npayload: %s", ex.what(), msg.toStdString().c_str()));
 }
 
 void MainWindow::invalidMessageReceived(int parts) {
