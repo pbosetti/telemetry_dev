@@ -22,6 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
   // back the UI
   ui->endpointLine->setText(_zmq->endpoint());
 
+  _sequenceChartsModel = new QStandardItemModel(0, 0, ui->sequenceChart);
+  ui->sequenceChartSeriesList->setModel(_sequenceChartsModel);
+  _fullChartsModel = new QStandardItemModel(0, 0, ui->fullChart);
+  ui->fullChartSeriesList->setModel(_fullChartsModel);
+
   connect(ui->connectButton, &QPushButton::toggled, this,
           &MainWindow::connectButtonToggled);
 
@@ -35,9 +40,24 @@ MainWindow::MainWindow(QWidget *parent)
   connect(_zmq, &MXZmq::gotNoMessage, this, &MainWindow::noMessageReceived);
 
   connect(_zmq, &MXZmq::gotWrongMessage, this, &MainWindow::invalidMessageReceived);
+
+  connect(_sequenceChartsModel, &QStandardItemModel::itemChanged, this, [=](QStandardItem *item) {
+    bool onOff = item->checkState() == Qt::Checked ? true : false;
+    _sequenceCharts[item->text()]->setVisible(onOff);
+    ui->sequenceChart->replot();
+  });
+
+  connect(_fullChartsModel, &QStandardItemModel::itemChanged, this, [=](QStandardItem *item) {
+    bool onOff = item->checkState() == Qt::Checked ? true : false;
+    _fullCharts[item->text()]->setVisible(onOff);
+    ui->fullChart->replot();
+  });
 }
 
-MainWindow::~MainWindow() { 
+MainWindow::~MainWindow() {
+  delete _sequenceChartsModel;
+  delete _fullChartsModel;
+  delete _zmq;
   delete ui; 
 }
 
@@ -123,6 +143,10 @@ void MainWindow::newMessageReceived(const QJsonObject &obj) {
       // single value: add it to lower plot
       if (val.isDouble()) {
         if (!_sequenceCharts.contains(k)) {
+          QStandardItem *item = new QStandardItem(k);
+          item->setCheckable(true);
+          item->setCheckState(Qt::Checked);
+          _sequenceChartsModel->appendRow(item);
           _sequenceCharts[k] = ui->sequenceChart->addGraph();
           _sequenceCharts[k]->setName(k);
         }
@@ -131,6 +155,7 @@ void MainWindow::newMessageReceived(const QJsonObject &obj) {
         ui->sequenceChart->yAxis->rescale(true);
         ui->sequenceChart->replot();
       }
+
       // Array: add it to upper plot
       else if (val.isArray()) {
         // check structure
@@ -140,6 +165,10 @@ void MainWindow::newMessageReceived(const QJsonObject &obj) {
         if (ary.at(0).toArray().count() != ary.at(1).toArray().count())
           throw std::invalid_argument("XY plot colums must have same lengths");
         if (!_fullCharts.contains(k)) {
+          QStandardItem *item = new QStandardItem(k);
+          item->setCheckable(true);
+          item->setCheckState(Qt::Checked);
+          _fullChartsModel->appendRow(item);
           _fullCharts[k] = new QCPCurve(ui->fullChart->xAxis, ui->fullChart->yAxis);
           _fullCharts[k]->setName(k);
         }
@@ -152,6 +181,7 @@ void MainWindow::newMessageReceived(const QJsonObject &obj) {
         ui->fullChart->yAxis->rescale(true);
         ui->fullChart->replot();
       }
+
       // Unsupported type
       else {
         throw std::invalid_argument(std::string("Unexpected type in JSON object ") + k.toStdString());

@@ -39,5 +39,7 @@ private:
   QSettings _settings = QSettings(APP_DOMAIN, APP_NAME);
   QMap<QString, QCPGraph *> _sequenceCharts;
   QMap<QString, QCPCurve *> _fullCharts;
+  QStandardItemModel *_sequenceChartsModel;
+  QStandardItemModel *_fullChartsModel;
 };
 #endif // MAINWINDOW_H
