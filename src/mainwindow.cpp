@@ -29,6 +29,12 @@ MainWindow::MainWindow(QWidget *parent)
           &MainWindow::endpointLineEdited);
 
   connect(_zmq, &MXZmq::gotNewMessage, this, &MainWindow::newMessageReceived);
+
+  connect(_zmq, &MXZmq::gotInvalidPayload, this, &MainWindow::invalidPayloadReceived);
+
+  connect(_zmq, &MXZmq::gotNoMessage, this, &MainWindow::noMessageReceived);
+
+  connect(_zmq, &MXZmq::gotWrongMessage, this, &MainWindow::invalidMessageReceived);
 }
 
 MainWindow::~MainWindow() { 
@@ -109,8 +115,21 @@ void MainWindow::endpointLineEdited(const QString &text) {
   }
 }
 
-void MainWindow::newMessageReceived() {
+void MainWindow::newMessageReceived(const QJsonObject &obj) {
   ui->logMessageArea->appendPlainText(_zmq->payload());
+  ui->statusbar->clearMessage();
+}
+
+void MainWindow::invalidPayloadReceived(const QString &msg) {
+  ui->logMessageArea->appendPlainText(QString::asprintf("Invalid JSON: %s", msg.toStdString().c_str()));
+}
+
+void MainWindow::invalidMessageReceived(int parts) {
+  ui->logMessageArea->appendPlainText(QString::asprintf("Message with %d parts", parts));
+}
+
+void MainWindow::noMessageReceived() {
+  ui->statusbar->showMessage("No incoming messages", SOCKET_TIMEOUT*2);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

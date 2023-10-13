@@ -34,12 +34,14 @@ public slots:
   bool setEndpoint(const zmqpp::endpoint_t &text);
 
 signals:
-  void gotNewMessage();
-  void gotInvalidMessage();
+  void gotNewMessage(const QJsonObject &obj);
+  void gotInvalidPayload(const QString &msg);
+  void gotWrongMessage(int parts);
+  void gotNoMessage();
 
 private:
-  zmqpp::context *_context;
-  zmqpp::socket *_socket;
+  QSharedPointer<zmqpp::context> _context;
+  QSharedPointer<zmqpp::socket> _socket;
   zmqpp::endpoint_t _endpoint;
   std::string _payload = "";
   bool _connected = false;

@@ -51,7 +51,7 @@ configure_file(
 #    |_|\__,_|_|  \__, |\___|\__|___/
 #                 |___/              
 
-include_directories(${USR_DIR}/include)
+include_directories(${USR_DIR}/include ${SOURCE_DIR})
 link_directories(${USR_DIR}/lib)
 
 # List of required libraries

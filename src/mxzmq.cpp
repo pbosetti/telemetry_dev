@@ -7,8 +7,8 @@
 
 MXZmq::MXZmq(QObject *parent, QString topic, zmqpp::endpoint_t endpoint)
     : QThread{parent}, topic(topic) {
-  _context = new zmqpp::context();
-  _socket = new zmqpp::socket(*_context, zmqpp::socket_type::subscribe);
+  _context = QSharedPointer<zmqpp::context>(new zmqpp::context());
+  _socket = QSharedPointer<zmqpp::socket>(new zmqpp::socket(*_context.data(), zmqpp::socket_type::subscribe));
   _socket->set(zmqpp::socket_option::receive_timeout, SOCKET_TIMEOUT);
   if (!setEndpoint(endpoint)) {
     setEndpoint(QString(DEFAULT_ENDPOINT));
@@ -50,24 +50,39 @@ void MXZmq::run() {
   if (!_connected) {
     return;
   }
-  zmqpp::message_t *message = new zmqpp::message_t;
+  // STL version
+  // std::unique_ptr<zmqpp::message_t> message(new zmqpp::message_t);
+  // QT version
+  QScopedPointer<zmqpp::message_t> message(new zmqpp::message_t);
+  int parts = 0;
   while (!isInterruptionRequested()) {
     if (_socket->receive(*message)) {
-      if (message->parts() == 2) {
+      parts = message->parts();
+      // no compression part in message
+      if (parts == 2) {
         format = FORMAT_PLAIN;
         _payload = message->get(1);
-      } else if (message->parts() == 3) {
+      }
+      // compression part in message
+      else if (parts == 3) {
         format = QString::fromStdString(message->get(1));
         _payload = message->get(2);
-      } else {
-        _payload = "Empty message";
       }
-      emit gotNewMessage();
+      // wrong number of parts
+      else {
+        emit gotWrongMessage(parts);
+        continue;
+      }
+      // payload processing
+      try {
+        emit gotNewMessage(payloadData());
+      } catch (...) {
+        emit gotInvalidPayload(QString::fromStdString(_payload));
+      }
     } else {
-      emit gotInvalidMessage();
+      emit gotNoMessage();
     }
   }
-  delete message;
 }
 
 // Valid endpoints are:

@@ -25,7 +25,10 @@ private slots:
   void appendLogMessage(bool status);
   void connectButtonToggled(bool checked);
   void endpointLineEdited(const QString &text);
-  void newMessageReceived();
+  void newMessageReceived(const QJsonObject &obj);
+  void invalidPayloadReceived(const QString &msg);
+  void invalidMessageReceived(int parts);
+  void noMessageReceived();
   void closeEvent(QCloseEvent *event);
 
 private:
