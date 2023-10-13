@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QSettings>
 #include "mxzmq.h"
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -32,8 +33,11 @@ private slots:
   void closeEvent(QCloseEvent *event);
 
 private:
+  unsigned long long _messageCount = 0;
   Ui::MainWindow *ui;
   MXZmq *_zmq;
   QSettings _settings = QSettings(APP_DOMAIN, APP_NAME);
+  QMap<QString, QCPGraph *> _sequenceCharts;
+  QMap<QString, QCPCurve *> _fullCharts;
 };
 #endif // MAINWINDOW_H

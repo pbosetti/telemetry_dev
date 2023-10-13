@@ -116,8 +116,53 @@ void MainWindow::endpointLineEdited(const QString &text) {
 }
 
 void MainWindow::newMessageReceived(const QJsonObject &obj) {
-  ui->logMessageArea->appendPlainText(_zmq->payload());
+  QJsonValue val;
+  foreach (auto &k, obj.keys()) {
+    val = obj.value(k);
+    try {
+      // single value: add it to lower plot
+      if (val.isDouble()) {
+        if (!_sequenceCharts.contains(k)) {
+          _sequenceCharts[k] = ui->sequenceChart->addGraph();
+          _sequenceCharts[k]->setName(k);
+        }
+        _sequenceCharts[k]->addData(_messageCount, val.toDouble());
+        ui->sequenceChart->xAxis->rescale(true);
+        ui->sequenceChart->yAxis->rescale(true);
+        ui->sequenceChart->replot();
+      }
+      // Array: add it to upper plot
+      else if (val.isArray()) {
+        // check structure
+        QJsonArray ary = val.toArray();
+        if (ary.count() != 2)
+          throw std::invalid_argument("XY plot must have two columns");
+        if (ary.at(0).toArray().count() != ary.at(1).toArray().count())
+          throw std::invalid_argument("XY plot colums must have same lengths");
+        if (!_fullCharts.contains(k)) {
+          _fullCharts[k] = new QCPCurve(ui->fullChart->xAxis, ui->fullChart->yAxis);
+          _fullCharts[k]->setName(k);
+        }
+        unsigned long n = ary.at(0).toArray().count();
+        _fullCharts[k]->data().data()->clear();
+        for (int i = 0; i < n; i++) {
+          _fullCharts[k]->addData(ary.at(0).toArray().at(i).toDouble(), ary.at(1).toArray().at(i).toDouble());
+        }
+        ui->fullChart->xAxis->rescale(true);
+        ui->fullChart->yAxis->rescale(true);
+        ui->fullChart->replot();
+      }
+      // Unsupported type
+      else {
+        throw std::invalid_argument(std::string("Unexpected type in JSON object ") + k.toStdString());
+      }
+    } catch (std::invalid_argument &ex) {
+      ui->statusbar->showMessage("Error dealing with message");
+      ui->logMessageArea->appendPlainText(ex.what());
+    }
+  }
   ui->statusbar->clearMessage();
+  _messageCount++;
 }
 
 void MainWindow::invalidPayloadReceived(const std::invalid_argument &ex, const QString &msg) {
