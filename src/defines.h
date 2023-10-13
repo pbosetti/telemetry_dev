@@ -3,6 +3,7 @@
 
 #define APP_NAME "telemetry_dev"
 #define APP_VERSION "0.1.0"
+#define APP_DOMAIN "it.unitn.telemetry_dev"
 
 #define SOCKET_TIMEOUT 200 // Milliseconds
 #define CONNECT_DELAY 200000 // Microseconds

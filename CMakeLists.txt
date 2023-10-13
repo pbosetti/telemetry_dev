@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 #  |____/ \___|\__|\__|_|_| |_|\__, |___/
 #                              |___/     
 set(APP_NAME telemetry_dev)
+set(APP_DOMAIN it.unitn)
 project(${APP_NAME} VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -81,7 +82,7 @@ target_link_libraries(${APP_NAME} PRIVATE
   ${LIB_LIST}
 )
 
-set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER it.unitn.${APP_NAME})
+set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_DOMAIN}.${APP_NAME})
 
 set_target_properties(${APP_NAME} PROPERTIES
   ${BUNDLE_ID_OPTION}

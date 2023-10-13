@@ -3,6 +3,7 @@
 
 #define APP_NAME "@APP_NAME@"
 #define APP_VERSION "@PROJECT_VERSION@"
+#define APP_DOMAIN "@APP_DOMAIN@.@APP_NAME@"
 
 #define SOCKET_TIMEOUT 200 // Milliseconds
 #define CONNECT_DELAY 200000 // Microseconds
