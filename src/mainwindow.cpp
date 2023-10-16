@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
   _fullChartsModel = new QStandardItemModel(0, 0, ui->fullChart);
   ui->fullChartSeriesList->setModel(_fullChartsModel);
 
+  setWindowTitle(APP_NAME " - " APP_VERSION);
+
   connect(ui->connectButton, &QPushButton::toggled, this,
           &MainWindow::connectButtonToggled);
 
