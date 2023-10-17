@@ -50,24 +50,37 @@ void MXZmq::run() {
   if (!_connected) {
     return;
   }
-  zmqpp::message_t *message = new zmqpp::message_t;
+  // alla STL
+  // std::unique_ptr<zmqpp::message_t> message(new zmqpp::message_t);
+  QScopedPointer<zmqpp::message_t> message(new zmqpp::message_t);
+  int parts = 0;
   while (!isInterruptionRequested()) {
     if (_socket->receive(*message)) {
-      if (message->parts() == 2) {
+      parts = message->parts();
+      // no compression part
+      if (2 == parts) {
         format = FORMAT_PLAIN;
         _payload = message->get(1);
-      } else if (message->parts() == 3) {
+      }
+      // compression format part is present
+      else if (3 == parts) {
         format = QString::fromStdString(message->get(1));
         _payload = message->get(2);
-      } else {
-        _payload = "Empty message";
       }
-      emit gotNewMessage();
+      // wrong number of parts
+      else {
+        emit gotWrongMessage(parts);
+        continue;
+      }
+      try {
+        emit gotNewMessage(payloadData());
+      } catch(std::invalid_argument &ex) {
+        emit gotInvalidPayload(ex, payload());
+      }
     } else {
-      emit gotInvalidMessage();
+      emit gotNoMessage();
     }
   }
-  delete message;
 }
 
 // Valid endpoints are:
@@ -117,7 +130,7 @@ QJsonDocument MXZmq::payloadDocument() {
     }
   }
   if (doc.isNull()) {
-    throw std::invalid_argument("Empty document");
+    throw std::invalid_argument("Not a valid JSON object");
   }
   return doc;
 }

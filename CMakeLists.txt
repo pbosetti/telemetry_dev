@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 #  |____/ \___|\__|\__|_|_| |_|\__, |___/
 #                              |___/     
 set(APP_NAME telemetry_dev)
+set(APP_DOMAIN it.unitn)
 project(${APP_NAME} VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -50,7 +51,7 @@ configure_file(
 #    |_|\__,_|_|  \__, |\___|\__|___/
 #                 |___/              
 
-include_directories(${USR_DIR}/include)
+include_directories(${USR_DIR}/include ${SOURCE_DIR})
 link_directories(${USR_DIR}/lib)
 
 # List of required libraries

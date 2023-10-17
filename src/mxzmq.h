@@ -34,8 +34,10 @@ public slots:
   bool setEndpoint(const zmqpp::endpoint_t &text);
 
 signals:
-  void gotNewMessage();
-  void gotInvalidMessage();
+  void gotNewMessage(const QJsonObject &obj);
+  void gotInvalidPayload(const std::invalid_argument &ex, const QString &payload);
+  void gotWrongMessage(int parts);
+  void gotNoMessage();
 
 private:
   zmqpp::context *_context;

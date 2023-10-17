@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
     topic = options_parsed["topic"].as<string>();
   }
 
+  subscriber.set(zmqpp::socket_option::receive_timeout, SOCKET_TIMEOUT);
   subscriber.connect(endpoint);
   subscriber.subscribe(topic);
 
@@ -70,8 +71,6 @@ int main(int argc, char *argv[]) {
       } else {
         cout << "[" << topic << "] Got message (uncompressed): " << payload << endl;
       }
-    } else {
-      cout << "Message has the wrong number of parts (" << message.parts() << ")" << endl;
     }
   }
 
